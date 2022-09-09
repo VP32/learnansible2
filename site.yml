@@ -1,6 +1,7 @@
 ---
 - name: Install Clickhouse
   hosts: clickhouse
+  remote_user: centos
   handlers:
     - name: Start clickhouse service
       become: true
@@ -27,6 +28,8 @@
           - clickhouse-client-{{ clickhouse_version }}.rpm
           - clickhouse-server-{{ clickhouse_version }}.rpm
       notify: Start clickhouse service
+    - name: Flush handlers
+      meta: flush_handlers
     - name: Create database
       ansible.builtin.command: "clickhouse-client -q 'create database logs;'"
       register: create_db
