@@ -15,5 +15,5 @@ variable "yc_region" {
 }
 
 variable "image_id" {
-  default = "fd80le4b8gt2u33lvubr" // centos-7-v20211220
+  default = "fd88d14a6790do254kj7" // centos-7
 }

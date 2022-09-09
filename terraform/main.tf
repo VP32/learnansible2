@@ -26,10 +26,16 @@ resource "yandex_compute_instance" "vp_netology_learnansible" {
 
   network_interface {
     subnet_id = "${yandex_vpc_subnet.subnet-1.id}"
+    nat = true
   }
 
   scheduling_policy {
     preemptible = local.preemptible
+  }
+
+  metadata = {
+    #ssh-keys = "ubuntu:${file("meta_users.txt")}"
+    ssh-keys = "centos:${file("~/.ssh/id_yc_rsa.pub")}"
   }
 }
 
@@ -42,4 +48,8 @@ resource "yandex_vpc_subnet" "subnet-1" {
   zone           = var.yc_region
   network_id     = yandex_vpc_network.network-1.id
   v4_cidr_blocks = ["192.168.0.0/16"]
+}
+
+output "instance_ip" {
+  value = "${yandex_compute_instance.vp_netology_learnansible.network_interface[0].nat_ip_address}"
 }
