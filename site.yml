@@ -2,6 +2,7 @@
 - name: Install Clickhouse
   hosts: clickhouse
   remote_user: centos
+  tags: clickhouse
   handlers:
     - name: Start clickhouse service
       become: true
@@ -11,16 +12,19 @@
   tasks:
     - block:
         - name: Get clickhouse distrib
+          tags: get_distrib
           ansible.builtin.get_url:
             url: "https://packages.clickhouse.com/rpm/stable/{{ item }}-{{ clickhouse_version }}.noarch.rpm"
             dest: "./{{ item }}-{{ clickhouse_version }}.rpm"
           with_items: "{{ clickhouse_packages }}"
       rescue:
         - name: Get clickhouse distrib
+          tags: get_distrib
           ansible.builtin.get_url:
             url: "https://packages.clickhouse.com/rpm/stable/clickhouse-common-static-{{ clickhouse_version }}.x86_64.rpm"
             dest: "./clickhouse-common-static-{{ clickhouse_version }}.rpm"
     - name: Install clickhouse packages
+      tags: install_distrib
       become: true
       ansible.builtin.yum:
         name:
@@ -32,6 +36,7 @@
       meta: flush_handlers
     - name: Create database
       ansible.builtin.command: "clickhouse-client -q 'create database logs;'"
+      tags: check
       register: create_db
       failed_when: create_db.rc != 0 and create_db.rc !=82
       changed_when: create_db.rc == 0
@@ -39,18 +44,22 @@
 - name: Install Vector
   hosts: vector
   remote_user: centos
+  tags: vector
   tasks:
     - name: Get vector distrib
+      tags: get_distrib
       ansible.builtin.get_url:
         url: "https://packages.timber.io/vector/{{ vector_version }}/vector-{{ vector_version }}-{{ vector_minor_version }}.{{ ansible_architecture }}.rpm"
         dest: "./vector-{{ vector_version }}.rpm"
     - name: Install vector distrib
       become: true
+      tags: install_distrib
       ansible.builtin.yum:
         name:
           - vector-{{ vector_version }}.rpm
     - name: Check vector works correctly
       ansible.builtin.command: "vector --version"
+      tags: check
       register: vector_checked
       failed_when: vector_checked.rc != 0
       changed_when: vector_checked == 0

@@ -34,7 +34,6 @@ resource "yandex_compute_instance" "vp_netology_learnansible" {
   }
 
   metadata = {
-    #ssh-keys = "ubuntu:${file("meta_users.txt")}"
     ssh-keys = "centos:${file("~/.ssh/id_yc_rsa.pub")}"
   }
 }
