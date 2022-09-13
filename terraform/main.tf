@@ -8,10 +8,13 @@ provider "yandex" {
 locals {
   image_type  = var.image_id
   preemptible = true
+
 }
 
 resource "yandex_compute_instance" "vp_netology_learnansible" {
-  name = "test-1"
+  name = "test-${count.index}"
+
+  count = 3
 
   resources {
     cores  = 2
@@ -50,5 +53,5 @@ resource "yandex_vpc_subnet" "subnet-1" {
 }
 
 output "instance_ip" {
-  value = "${yandex_compute_instance.vp_netology_learnansible.network_interface[0].nat_ip_address}"
+  value = {for k, v in yandex_compute_instance.vp_netology_learnansible: k => v.network_interface.0.nat_ip_address}
 }

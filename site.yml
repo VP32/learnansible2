@@ -46,20 +46,69 @@
   remote_user: centos
   tags: vector
   tasks:
-    - name: Get vector distrib
-      tags: get_distrib
-      ansible.builtin.get_url:
-        url: "https://packages.timber.io/vector/{{ vector_version }}/vector-{{ vector_version }}-{{ vector_minor_version }}.{{ ansible_architecture }}.rpm"
-        dest: "./vector-{{ vector_version }}.rpm"
     - name: Install vector distrib
       become: true
       tags: install_distrib
       ansible.builtin.yum:
         name:
-          - vector-{{ vector_version }}.rpm
+          - "https://packages.timber.io/vector/{{ vector_version }}/vector-{{ vector_version }}-{{ vector_minor_version }}.{{ ansible_architecture }}.rpm" # vector-{{ vector_version }}.rpm
     - name: Check vector works correctly
       ansible.builtin.command: "vector --version"
       tags: check
       register: vector_checked
       failed_when: vector_checked.rc != 0
       changed_when: vector_checked == 0
+
+- name: Install Lighthouse
+  hosts: lighthouse
+  remote_user: centos
+  tags: lighthouse
+  tasks:
+    - name: Install unzip
+      become: true
+      tags: install_distrib
+      ansible.builtin.yum:
+        name: unzip
+        state: present
+    - name: Download Lighthouse ZIP
+      ansible.builtin.get_url:
+        url: "{{ lighthouse_zip }}"
+        dest: ./master.zip
+    - name: Extract Lighthouse ZIP
+      tags: install_distrib
+      become: true
+      ansible.builtin.unarchive:
+        src: ./master.zip
+        dest: /usr/share/nginx/html
+        remote_src: yes
+    - name: Allow connections on 80 port
+      tags: configure
+      become: true
+      ansible.builtin.iptables:
+        chain: INPUT
+        protocol: tcp
+        destination_ports:
+          - "80"
+        jump: ACCEPT
+    - name: Install EPEL repo
+      become: yes
+      tags: install_distrib
+      ansible.builtin.yum:
+        name: epel-release
+        state: present
+    - name: Install Nginx
+      become: true
+      tags: install_distrib
+      ansible.builtin.yum:
+        name: nginx
+    - name: Copy Nginx config
+      tags: configure
+      become: true
+      ansible.builtin.copy:
+       src: ./confs/nginx.conf
+       dest: /etc/nginx/nginx.conf
+    - name: Start Nginx service
+      become: true
+      service:
+        name: nginx
+        state: started
