@@ -51,7 +51,8 @@
       tags: install_distrib
       ansible.builtin.yum:
         name:
-          - "https://packages.timber.io/vector/{{ vector_version }}/vector-{{ vector_version }}-{{ vector_minor_version }}.{{ ansible_architecture }}.rpm" # vector-{{ vector_version }}.rpm
+          - "https://packages.timber.io/vector/{{ vector_version }}/vector-{{ vector_version }}\
+          -{{ vector_minor_version }}.{{ ansible_architecture }}.rpm"
     - name: Check vector works correctly
       ansible.builtin.command: "vector --version"
       tags: check
@@ -70,6 +71,17 @@
       ansible.builtin.yum:
         name: unzip
         state: present
+    - name: Install EPEL repo
+      become: true
+      tags: install_distrib
+      ansible.builtin.yum:
+        name: epel-release
+        state: present
+    - name: Install Nginx
+      become: true
+      tags: install_distrib
+      ansible.builtin.yum:
+        name: nginx
     - name: Download Lighthouse ZIP
       ansible.builtin.get_url:
         url: "{{ lighthouse_zip }}"
@@ -80,7 +92,7 @@
       ansible.builtin.unarchive:
         src: ./master.zip
         dest: /usr/share/nginx/html
-        remote_src: yes
+        remote_src: true
     - name: Allow connections on 80 port
       tags: configure
       become: true
@@ -90,23 +102,13 @@
         destination_ports:
           - "80"
         jump: ACCEPT
-    - name: Install EPEL repo
-      become: yes
-      tags: install_distrib
-      ansible.builtin.yum:
-        name: epel-release
-        state: present
-    - name: Install Nginx
-      become: true
-      tags: install_distrib
-      ansible.builtin.yum:
-        name: nginx
     - name: Copy Nginx config
       tags: configure
       become: true
       ansible.builtin.copy:
-       src: ./confs/nginx.conf
-       dest: /etc/nginx/nginx.conf
+        src: ./confs/nginx.conf
+        dest: /etc/nginx/nginx.conf
+        mode: '0644'
     - name: Start Nginx service
       become: true
       service:
