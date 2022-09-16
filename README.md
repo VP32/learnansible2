@@ -29,13 +29,12 @@
 
 ### Переменные
 
-Указаны в файлах в папке group_vars 
+Используются роли для всех действий. Переменные, которые можно переопределить для ролей:
  
-- clickhouse_version - версия Clickhouse
-- clickhouse_packages - набор пакетов для установки Clickhouse
 - vector_version - версия Vector
 - vector_minor_version - минорная версия Vector, обычно 1
-- lighthouse_zip - путь для скачивания zip-архива (с веткой master) для Lighthouse
+- nginx_root_folder - путь для сайта в Nginx
+- lighthouse_dir - путь для установки Lighthouse
 
 ### Теги
 

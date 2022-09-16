@@ -6,12 +6,12 @@
   - name: vector
     src: git@github.com:VP32/vector-role.git
     scm: git
-    version: "1.0.1"
+    version: "1.0.2"
   - name: nginx
     src: git@github.com:VP32/nginx-role.git
     scm: git
-    version: "1.0.1"
+    version: "1.0.2"
   - name: lighthouse
     src: git@github.com:VP32/lighthouse-role.git
     scm: git
-    version: "1.0.1"
+    version: "1.0.2"
